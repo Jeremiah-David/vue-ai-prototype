@@ -1,3 +1,9 @@
 {
-  "recommendations": ["Vue.volar"]
+  "recommendations": [
+    // Tailwind CSS
+    "bradlc.vscode-tailwindcss",
+
+    // Code Formatting
+    "esbenp.prettier-vscode"
+  ]
 }
