@@ -8,9 +8,7 @@ export class AccessControl {
     this.isAuthenticated = false
     this.sessionKey = 'aialpha_access_token'
     this.validPasswords = [
-      'demo2025',           // Simple demo password
-      'aialpha-preview',    // Project-specific password
-      'team-access'         // Team password
+        'NGERULES', // Custom team password
     ]
   }
 

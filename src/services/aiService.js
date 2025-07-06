@@ -37,8 +37,13 @@ class AIService {
         try {
             const apiKey = import.meta.env.VITE_OPENAI_API_KEY
 
+            // Demo/Mock mode when no API key is available
             if (!apiKey || apiKey === 'your_openai_api_key_here') {
-                throw new Error('OpenAI API key is required for AI functionality')
+                console.log('🔧 Running in DEMO MODE - No OpenAI API key provided')
+                console.log('💡 AI commands will use simulated responses')
+                this.client = null // Will trigger mock mode
+                this.isInitialized = true
+                return
             }
 
             this.client = new OpenAI({
@@ -49,8 +54,9 @@ class AIService {
             this.isInitialized = true
             console.log('✅ OpenAI client initialized successfully')
         } catch (error) {
-            console.error('❌ Failed to initialize OpenAI client:', error)
-            throw error
+            console.error('❌ Failed to initialize OpenAI client, falling back to demo mode:', error)
+            this.client = null // Enable mock mode on error
+            this.isInitialized = true
         }
     }
 
@@ -154,6 +160,11 @@ class AIService {
                 throw new Error('Invalid user input')
             }
 
+            // Mock mode when no OpenAI client (demo mode)
+            if (!this.client) {
+                return this.generateMockResponse(userInput, registry)
+            }
+
             if (this.requestCount >= this.sessionLimit) {
                 throw new Error(
                     `Session limit reached (${this.sessionLimit} requests). Please refresh the page.`
@@ -224,7 +235,10 @@ Examples:
                             result: result,
                         })
                     } catch (error) {
-                        console.error(`❌ Failed to execute ${functionName}:`, error)
+                        console.error(
+                            `❌ Failed to execute ${functionName}:`,
+                            error
+                        )
                         results.push({
                             function: functionName,
                             args: functionArgs,
@@ -238,17 +252,26 @@ Examples:
             // Update conversation history
             this.conversationHistory.push(
                 { role: 'user', content: userInput },
-                { role: 'assistant', content: message.content || `Event updated! Executed ${results.length} function(s).` }
+                {
+                    role: 'assistant',
+                    content:
+                        message.content ||
+                        `Event updated! Executed ${results.length} function(s).`,
+                }
             )
 
             // Limit conversation history for cost control
             if (this.conversationHistory.length > this.maxHistoryLength * 2) {
-                this.conversationHistory = this.conversationHistory.slice(-this.maxHistoryLength * 2)
+                this.conversationHistory = this.conversationHistory.slice(
+                    -this.maxHistoryLength * 2
+                )
             }
 
             return {
                 success: true,
-                message: message.content || `Event updated successfully! Executed ${results.length} function(s).`,
+                message:
+                    message.content ||
+                    `Event updated successfully! Executed ${results.length} function(s).`,
                 functions: results,
                 usage: response.usage,
             }
@@ -304,6 +327,92 @@ Examples:
         } catch (error) {
             console.error(`❌ Function execution error for ${functionName}:`, error)
             throw error
+        }
+    }
+
+    /**
+     * Generate mock responses for demo mode (when no OpenAI API key is available)
+     */
+    async generateMockResponse(userInput, registry) {
+        console.log('🎭 DEMO MODE: Generating mock AI response for:', userInput)
+        
+        const input = userInput.toLowerCase()
+        const results = []
+        
+        // Simulate processing delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        try {
+            // Mock event name detection
+            if (input.includes('event') || input.includes('conference') || input.includes('meetup') || input.includes('festival')) {
+                let eventName = 'Demo Event'
+                if (input.includes('conference')) eventName = 'Demo Conference'
+                if (input.includes('meetup')) eventName = 'Demo Meetup'
+                if (input.includes('festival')) eventName = 'Demo Festival'
+                if (input.includes('workshop')) eventName = 'Demo Workshop'
+                
+                const result = await registry.executeMethod('setEventName', { name: eventName })
+                results.push({ function: 'setEventName', args: { name: eventName }, result })
+            }
+            
+            // Mock description setting
+            if (input.includes('tech') || input.includes('music') || input.includes('art') || input.includes('business')) {
+                let description = 'A demo event for testing AI functionality'
+                if (input.includes('tech')) description = 'A technology event showcasing the latest innovations'
+                if (input.includes('music')) description = 'A musical celebration bringing people together'
+                if (input.includes('art')) description = 'An artistic showcase of creative talents'
+                if (input.includes('business')) description = 'A business networking and development event'
+                
+                const result = await registry.executeMethod('setEventDescription', { description })
+                results.push({ function: 'setEventDescription', args: { description }, result })
+            }
+            
+            // Mock ticket type detection
+            const ticketTypes = []
+            if (input.includes('vip')) ticketTypes.push('VIP')
+            if (input.includes('general') || input.includes('standard')) ticketTypes.push('General Admission')
+            if (input.includes('student')) ticketTypes.push('Student')
+            if (input.includes('early') && input.includes('bird')) ticketTypes.push('Early Bird')
+            if (input.includes('children') || input.includes('kids')) ticketTypes.push('Children')
+            if (input.includes('adult')) ticketTypes.push('Adults')
+            if (input.includes('pro') || input.includes('professional')) ticketTypes.push('Professional')
+            if (input.includes('amateur')) ticketTypes.push('Amateur')
+            
+            // If no specific types found, add a default
+            if (ticketTypes.length === 0 && (input.includes('ticket') || results.length > 0)) {
+                ticketTypes.push('General Admission')
+            }
+            
+            for (const ticketType of ticketTypes) {
+                const result = await registry.executeMethod('addTicketType', { 
+                    name: ticketType, 
+                    price: Math.floor(Math.random() * 100) + 10 // Random price for demo
+                })
+                results.push({ function: 'addTicketType', args: { name: ticketType, price: result.args?.price }, result })
+            }
+            
+            // Mock waitlist detection
+            if (input.includes('waitlist')) {
+                const enabled = !input.includes('no') && !input.includes('disable') && !input.includes('off')
+                const result = await registry.executeMethod('toggleWaitlist', { enabled })
+                results.push({ function: 'toggleWaitlist', args: { enabled }, result })
+            }
+            
+            return {
+                success: true,
+                message: `🎭 DEMO MODE: Simulated AI response - processed "${userInput}"`,
+                results: results,
+                demoMode: true
+            }
+            
+        } catch (error) {
+            console.error('❌ Mock response error:', error)
+            return {
+                success: false,
+                message: `Demo mode error: ${error.message}`,
+                results: [],
+                demoMode: true
+            }
         }
     }
 
