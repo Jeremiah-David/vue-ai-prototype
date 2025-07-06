@@ -2,75 +2,87 @@
 
 ## Overview
 
-The AI Alpha prototype uses OpenAI's GPT-4 with function calling to provide controlled, secure AI-driven UI manipulation. This document explains how the AI integration works and how to extend it.
+The AI Alpha prototype uses OpenAI's GPT-4 with function calling to provide controlled, secure AI-driven event creation. This document explains how the AI integration works and its enterprise-ready architecture.
 
 ## Architecture
 
 ### Core Components
 
 1. **aiService.js** - Main AI service handling OpenAI integration
-2. **Home.vue** - Vue component with UI manipulation methods
-3. **Function Definitions** - Structured definitions for AI function calling
+2. **aiManipulationRegistry.js** - Secure registry of AI-accessible methods
+3. **Home.vue** - Vue component with event creation interface
 
 ### How It Works
 
 ```mermaid
 graph TD
-    A[User Input] --> B[AI Service]
+    A[User Command] --> B[AI Service]
     B --> C{OpenAI Available?}
     C -->|Yes| D[OpenAI GPT-4]
     C -->|No| E[Mock Processor]
     D --> F[Function Calling]
-    F --> G[Execute UI Methods]
+    F --> G[Execute Event Methods]
     E --> G
-    G --> H[Update UI]
+    G --> H[Update Event State]
 ```
 
 ## AI Function Calling
 
-The system uses OpenAI's function calling feature to ensure the AI can only execute predefined, safe methods:
+The system uses OpenAI's function calling feature to ensure the AI can only execute predefined, safe event management methods:
 
 ### Available Functions
 
 ```javascript
 const functions = [
   {
-    name: 'addButton',
-    description: 'Add a button to the interface',
+    name: 'setEventName',
+    description: 'Set the main event name',
     parameters: {
       type: 'object',
       properties: {
-        text: { type: 'string', description: 'Button text' },
-        style: {
-          type: 'object',
-          properties: {
-            color: { 
-              type: 'string', 
-              enum: ['purple', 'blue', 'green', 'red', 'gold', 'magic'] 
-            }
-          }
+        name: { 
+          type: 'string', 
+          description: 'Event name (3-100 characters)' 
         }
       },
-      required: ['text']
+      required: ['name']
     }
   },
-  // ... other functions
+  {
+    name: 'addTicketType',
+    description: 'Add a ticket type with optional pricing',
+    parameters: {
+      type: 'object',
+      properties: {
+        name: { 
+          type: 'string', 
+          description: 'Ticket type name (2-50 characters)' 
+        },
+        price: { 
+          type: 'number', 
+          description: 'Ticket price (optional, must be positive)' 
+        }
+      },
+      required: ['name']
+    }
+  }
+  // ... other event functions
 ]
 ```
 
 ### Function Execution Flow
 
-1. **User Command**: "Create a purple button that says 'Cast Spell'"
-2. **AI Analysis**: GPT-4 understands intent and parameters
-3. **Function Call**: AI returns structured function call
-4. **Validation**: Parameters validated against schema
-5. **Execution**: `addButton('Cast Spell', id, { color: 'purple' })`
-6. **UI Update**: Button appears in interface
+1. **User Command**: "Create a tech conference with professional and student tickets"
+2. **AI Analysis**: GPT-4 understands intent and extracts parameters
+3. **Function Call**: AI returns structured function calls for event creation
+4. **Validation**: Parameters validated against schemas in the registry
+5. **Execution**: `setEventName()`, `setEventDescription()`, `addTicketType()` methods called
+6. **State Update**: Event configuration updates in real-time
 
 ## Security Features
 
 ### Controlled Execution
-- ✅ AI can only call predefined functions
+- ✅ AI can only call predefined event management functions
 - ✅ No arbitrary code execution possible
 - ✅ All parameters validated before execution
 - ✅ Function schemas prevent invalid calls
@@ -98,8 +110,6 @@ try {
 ### Fallback Strategy
 - Primary: OpenAI GPT-4 with function calling
 - Fallback: Local mock processor with pattern matching
-- Graceful: No functionality loss if API unavailable
-
 ## Configuration
 
 ### Environment Variables
@@ -119,108 +129,14 @@ VITE_AI_MODE=real            # 'real' or 'mock'
 3. Add to `.env` file
 4. Restart development server
 
-## Extending the System
+## Enterprise Features
 
-### Adding New UI Functions
-
-1. **Define Vue Method**:
-```javascript
-const addChart = (type, data, style = {}) => {
-  elements.value.push({
-    type: 'chart',
-    chartType: type,
-    data,
-    style,
-    id: Date.now()
-  })
-}
-```
-
-2. **Add Function Definition**:
-```javascript
-{
-  name: 'addChart',
-  description: 'Add a chart or graph to the interface',
-  parameters: {
-    type: 'object',
-    properties: {
-      type: {
-        type: 'string',
-        enum: ['bar', 'line', 'pie', 'scatter'],
-        description: 'Type of chart to create'
-      },
-      data: {
-        type: 'array',
-        description: 'Chart data points'
-      }
-    },
-    required: ['type', 'data']
-  }
-}
-```
-
-3. **Add Execution Case**:
-```javascript
-case 'addChart':
-  uiMethods.addChart(parsedArgs.type, parsedArgs.data, parsedArgs.style || {})
-  break
-```
-
-### AI Prompt Engineering
-
-The system prompt guides AI behavior:
-
-```javascript
-const systemPrompt = `You are an AI assistant that helps users create and manipulate user interfaces through natural language commands. You can only execute predefined UI manipulation functions.
-
-Available capabilities:
-- Add interactive buttons with various colors and styles
-- Create information cards with titles and content  
-- Add counters for tracking progress or metrics
-- Generate story elements (titles, paragraphs, characters)
-- Change background themes and colors
-
-When processing requests, choose appropriate colors, text, and styling that match the user's intent. For themed requests, use consistent visual elements.`
-```
-
-## Testing
-
-### Manual Testing Commands
-```bash
-# Basic UI Elements
-"Add a blue button that says Start Game"
-"Create a counter for player score"
-"Add a card with title Dashboard and content Welcome to the game"
-
-# Story Generation  
-"Create a space adventure story with alien encounters"
-"Build a medieval fantasy tale with dragons and knights"
-
-# Theme Changes
-"Change to ocean theme with blue gradients"
-"Set magical purple background with sparkles"
-
-# Complex Scenarios
-"Create a game interface with start button, score counter, and magical theme"
-```
-
-### Error Scenarios
-```bash
-# These should gracefully fallback to mock mode:
-- Invalid API key
-- Network connectivity issues  
-- OpenAI API rate limits
-- Malformed function calls
-```
-
-## Monitoring & Debugging
-
-### Console Output
+### Monitoring & Debugging
 ```javascript
 // Successful AI processing
 ✅ OpenAI client initialized successfully
-🤖 Processing command with real AI: Create a purple button
-🚀 Executing addButton with args: { text: "Magic Button", style: { color: "purple" } }
+🤖 Processing command with real AI: Create a tech conference
+🚀 Executing setEventName with args: { name: "Tech Innovation Conference" }
 
 // Fallback mode
 ⚠️ OpenAI API key not configured. Using mock mode.
@@ -233,32 +149,13 @@ When processing requests, choose appropriate colors, text, and styling that matc
 - Command history shows processing mode
 - Error messages in command history
 
-## Performance Considerations
-
-### API Usage
-- Conversation history limited to 10 messages
+### Performance Considerations
+- Conversation history limited to 5 messages for cost control
 - Temperature set to 0.7 for balanced creativity/consistency
 - Function calling reduces token usage vs. text parsing
 - Automatic fallback prevents service interruption
 
-### Caching Strategy
-```javascript
-// Future enhancement: cache common patterns
-const responseCache = new Map()
-const cacheKey = `${command.toLowerCase()}-${JSON.stringify(context)}`
-```
-
-### Rate Limiting
-```javascript
-// Future enhancement: implement rate limiting
-const rateLimiter = {
-  requests: 0,
-  resetTime: Date.now() + 60000, // 1 minute
-  maxRequests: 60
-}
-```
-
-## Production Considerations
+## Production Deployment
 
 ### Backend Proxy (Recommended)
 ```javascript
@@ -273,9 +170,10 @@ const response = await fetch('/api/ai/process', {
 ### Security Best Practices
 - ✅ Never expose API keys in frontend code
 - ✅ Use backend proxy for API calls
-- ✅ Implement user authentication
-- ✅ Add input sanitization
-- ✅ Rate limit requests per user
+- ✅ Implement user authentication and authorization
+- ✅ Add comprehensive input sanitization
+- ✅ Rate limit requests per user and session
+- ✅ Log all AI interactions for audit compliance
 - ✅ Monitor API usage and costs
 
 ### Scalability

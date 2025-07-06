@@ -1,6 +1,6 @@
 # Development Guide
 
-This document provides comprehensive guidelines for developing the Vue AI Prototype application.
+This document provides comprehensive guidelines for developing and extending the AI Alpha event creation platform.
 
 ## Quick Start
 
@@ -12,8 +12,6 @@ Use `Ctrl+Shift+P` → "Tasks: Run Task" to access:
 - **Preview Production Build** - Tests the production build locally
 - **Install Dependencies** - Runs `npm install`
 - **Clean Install** - Runs `npm ci` for clean dependency installation
-- **Git: Add All and Commit** - Stages all changes and commits with custom message
-- **Git: Push to Origin** - Pushes changes to GitHub
 
 ### Key Commands
 ```bash
@@ -22,81 +20,72 @@ npm run build      # Build for production
 npm run preview    # Preview production build
 ```
 
-## AI Manipulation Implementation Guide
+## Event Creation Implementation Guide
 
 ### Core Principles
-1. **Simple Methods** - Each AI command should map to a simple, descriptive method
+1. **Focused Methods** - Each AI command maps to specific event management functions
 2. **Reactive State** - Use Vue's reactivity for immediate UI updates
-3. **Clear Feedback** - Provide visual feedback for all actions
-4. **Reversible Actions** - Where possible, allow operations to be undone
+3. **Clear Feedback** - Provide visual feedback for all event creation actions
+4. **Secure Registry** - All AI methods must be defined in the manipulation registry
 
 ### Implementation Pattern
 
 ```vue
 <script setup>
 import { ref, reactive } from 'vue'
+import { createAIManipulationRegistry } from '../services/aiManipulationRegistry.js'
 
-// Reactive state for UI elements
-const dynamicElements = ref([])
-const appState = reactive({
-  backgroundColor: '#ffffff',
-  counters: {},
-  settings: {}
+// Reactive state for event management
+const eventName = ref('')
+const eventDescription = ref('')
+const ticketTypes = ref([])
+const waitlistEnabled = ref(false)
+
+// Create the secure AI manipulation registry
+const manipulationRegistry = createAIManipulationRegistry({
+    eventName,
+    eventDescription,
+    ticketTypes,
+    waitlistEnabled
 })
 
-// AI manipulation methods
-const addButton = (text = 'New Button', color = 'blue') => {
-  const id = Date.now()
-  dynamicElements.value.push({
-    id,
-    type: 'button',
-    text,
-    color,
-    visible: true
-  })
-  console.log(`Added button: ${text} with ID: ${id}`)
-}
+// Get AI-accessible methods from registry
+const {
+    setEventName,
+    setEventDescription,
+    addTicketType,
+    toggleWaitlist
+} = manipulationRegistry.getAvailableMethods()
 
-const removeElement = (id) => {
-  const index = dynamicElements.value.findIndex(el => el.id === id)
-  if (index !== -1) {
-    dynamicElements.value.splice(index, 1)
-    console.log(`Removed element with ID: ${id}`)
-  }
+// Example usage
+const createSampleEvent = () => {
+  setEventName('Tech Conference 2025')
+  setEventDescription('A gathering of technology professionals')
+  addTicketType('General Admission', 199)
+  addTicketType('VIP', 499)
+  toggleWaitlist(true)
 }
-
-const changeBackground = (color) => {
-  appState.backgroundColor = color
-  console.log(`Background changed to: ${color}`)
-}
-
-const incrementCounter = (name = 'default') => {
-  if (!appState.counters[name]) {
-    appState.counters[name] = 0
-  }
-  appState.counters[name]++
-  console.log(`Counter '${name}' incremented to: ${appState.counters[name]}`)
-}
-
-// Make methods globally available for AI commands
-window.addButton = addButton
-window.removeElement = removeElement
-window.changeBackground = changeBackground
-window.incrementCounter = incrementCounter
 </script>
 
 <template>
-  <div :style="{ backgroundColor: appState.backgroundColor }">
-    <!-- Dynamic elements -->
-    <div v-for="element in dynamicElements" :key="element.id">
-      <button 
-        v-if="element.type === 'button'"
-        :style="{ backgroundColor: element.color }"
-        @click="() => console.log(`Clicked: ${element.text}`)"
-      >
-        {{ element.text }}
-      </button>
+  <div class="event-display">
+    <h2>{{ eventName || 'No event name set' }}</h2>
+    <p>{{ eventDescription || 'No description set' }}</p>
+    
+    <div v-if="ticketTypes.length > 0">
+      <h3>Ticket Types:</h3>
+      <div v-for="ticket in ticketTypes" :key="ticket.id">
+        {{ ticket.name }} 
+        <span v-if="ticket.price">${{ ticket.price }}</span>
+      </div>
     </div>
+    
+    <div>
+      Waitlist: {{ waitlistEnabled ? 'Enabled' : 'Disabled' }}
+    </div>
+  </div>
+</template>
+```
     
     <!-- Counters -->
     <div v-for="(count, name) in appState.counters" :key="name">
@@ -108,131 +97,60 @@ window.incrementCounter = incrementCounter
 
 ### Method Naming Conventions
 
-#### Action Verbs
-- `add*()` - Create new elements
-- `remove*()` - Delete elements
-- `update*()` - Modify existing elements
-- `toggle*()` - Switch states
-- `set*()` - Set specific values
-- `increment*()` - Increase values
-- `decrement*()` - Decrease values
+## AI Manipulation Registry
 
-#### Element Types
-- `*Button()` - Button elements
-- `*Counter()` - Counter components
-- `*Text()` - Text elements
-- `*Image()` - Image elements
-- `*Background()` - Background styling
-- `*Layout()` - Layout changes
-
-#### Examples
-```javascript
-// Good method names
-addButton(text, color)
-removeButton(id)
-updateButtonText(id, newText)
-toggleButtonVisibility(id)
-setBackgroundColor(color)
-incrementCounter(name)
-addTextElement(content, fontSize)
-changeLayoutDirection(direction)
-
-// Avoid generic names
-add()
-remove()
-change()
-update()
-```
-
-### State Management Guidelines
-
-#### Use `ref()` for:
-- Simple values (strings, numbers, booleans)
-- Arrays of simple items
-- Single reactive values
+### Security Architecture
+All AI-accessible methods must be defined in the manipulation registry:
 
 ```javascript
-const backgroundColor = ref('#ffffff')
-const isVisible = ref(true)
-const elementList = ref([])
-```
-
-#### Use `reactive()` for:
-- Complex objects
-- Nested data structures
-- Multiple related properties
-
-```javascript
-const appState = reactive({
-  theme: 'light',
-  counters: {},
-  settings: {
-    autoSave: true,
-    animations: false
-  }
-})
-```
-
-### Error Handling
-
-Always include error handling and validation:
-
-```javascript
-const addButton = (text, color = 'blue') => {
-  try {
-    // Validate inputs
-    if (!text || typeof text !== 'string') {
-      throw new Error('Button text must be a non-empty string')
+// Only these 4 methods can be executed by AI
+export class AIManipulationRegistry {
+    getAvailableMethods() {
+        return {
+            setEventName: this.setEventName.bind(this),
+            setEventDescription: this.setEventDescription.bind(this),
+            addTicketType: this.addTicketType.bind(this),
+            toggleWaitlist: this.toggleWaitlist.bind(this)
+        }
     }
-    
-    // Perform action
-    const id = Date.now()
-    dynamicElements.value.push({
-      id,
-      type: 'button',
-      text: text.trim(),
-      color,
-      visible: true
-    })
-    
-    console.log(`✅ Successfully added button: "${text}"`)
-    return id
-    
-  } catch (error) {
-    console.error(`❌ Failed to add button: ${error.message}`)
-    return null
-  }
 }
 ```
 
-### Testing Commands
+### Method Naming Convention
+- Use descriptive action-based names: `setEventName()`, `addTicketType()`, `toggleWaitlist()`
+- Prefix with action verbs: `set`, `add`, `toggle`
+- Focus on event management domain
 
-Create a test suite for manual testing:
+### Validation and Security
+Always include comprehensive validation:
 
 ```javascript
-// Add to your component for development testing
-const runTests = () => {
-  console.log('🧪 Running AI manipulation tests...')
-  
-  // Test button creation
-  const buttonId = addButton('Test Button', 'red')
-  
-  // Test counter
-  incrementCounter('test')
-  incrementCounter('test')
-  
-  // Test background
-  changeBackground('#f0f0f0')
-  
-  // Test removal
-  setTimeout(() => {
-    removeElement(buttonId)
-    console.log('✅ All tests completed')
-  }, 2000)
+setEventName(name) {
+    try {
+        // Validate inputs
+        if (!name || typeof name !== 'string') {
+            throw new Error('Event name must be a non-empty string')
+        }
+        
+        if (name.length < 3 || name.length > 100) {
+            throw new Error('Event name must be between 3 and 100 characters')
+        }
+        
+        // Sanitize input
+        const sanitizedName = name.trim().replace(/[<>]/g, '')
+        
+        // Update state
+        this.eventState.eventName.value = sanitizedName
+        
+        this.logAction('setEventName', { name: sanitizedName }, true)
+        return true
+        
+    } catch (error) {
+        console.error('Error setting event name:', error)
+        this.logAction('setEventName', { name }, false)
+        throw error
+    }
 }
-
-// Expose for console testing
-window.runTests = runTests
 ```
 
 ## File Structure
@@ -240,100 +158,57 @@ window.runTests = runTests
 ```
 src/
 ├── components/
-│   ├── AIButton.vue          # Reusable button component
-│   ├── AICounter.vue         # Counter component
-│   ├── AITextElement.vue     # Text display component
-│   └── HelloWorld.vue        # Original component
+│   └── Home.vue              # Main event creation interface
+├── services/
+│   ├── aiManipulationRegistry.js  # Secure AI method registry
+│   └── aiService.js          # OpenAI integration & function calling
 ├── assets/
 │   └── vue.svg              # Static assets
-├── App.vue                  # Main application (AI manipulation logic)
-├── main.js                  # Application entry point
+├── App.vue                  # Main application entry point
+├── main.js                  # Application bootstrap
 └── style.css                # Global styles
 ```
 
-## VS Code Configuration
+## Development Workflow
 
-### Recommended Extensions
-The project includes recommended extensions for optimal development experience:
-- Vue Language Features (Volar)
-- TypeScript Vue Plugin
-- Prettier Code Formatter
-- ESLint
-- GitLens
-- GitHub Copilot
-
-### Custom Settings
-The workspace includes settings for:
-- Auto-formatting on save
-- Vue-specific formatting rules
-- File nesting in explorer
-- Terminal configuration
-
-## Git Workflow
-
-### Recommended Commands
+### Testing Event Creation
+Test the AI integration with these commands:
 ```bash
-# Quick commit (using VS Code task)
-Ctrl+Shift+P → "Tasks: Git: Add All and Commit"
-
-# Manual workflow
-git add .
-git commit -m "feat: add new AI manipulation method"
-git push origin main
+"Create a tech conference in San Francisco"
+"Make a music festival with VIP and general tickets"
+"Add student tickets with waitlist enabled"
+"Set up a workshop with children and adult pricing"
 ```
 
-### Commit Message Conventions
-- `feat:` - New features
-- `fix:` - Bug fixes
-- `docs:` - Documentation updates
-- `style:` - Code style changes
-- `refactor:` - Code refactoring
-- `test:` - Adding tests
-- `chore:` - Maintenance tasks
+### Manual Testing
+```javascript
+// Test in browser console
+const registry = window.eventRegistry
+const methods = registry.getAvailableMethods()
 
-## Troubleshooting
+// Test event creation
+methods.setEventName("Test Conference")
+methods.setEventDescription("A test event")
+methods.addTicketType("General", 100)
+methods.toggleWaitlist(true)
 
-### Common Issues
-
-#### Development Server Won't Start
-```bash
-# Clear cache and reinstall
-rm -rf node_modules package-lock.json
-npm install
-npm run dev
+// Check state
+console.log(registry.getEventState())
+console.log(registry.getActionLog())
 ```
 
-#### Vue Components Not Updating
-- Check if using `ref()` or `reactive()` correctly
-- Ensure template uses `.value` for refs
-- Verify Vue DevTools in browser
+## Production Deployment
 
-#### AI Methods Not Working
-- Check browser console for errors
-- Verify methods are attached to window object
-- Test methods manually in browser console
-
-### Performance Tips
-- Use `markRaw()` for non-reactive objects
-- Implement `v-memo` for expensive list rendering
-- Use `shallowRef()` for large objects that don't need deep reactivity
-
-## Deployment
-
-### Production Build
+### Build Process
 ```bash
-npm run build      # Creates dist/ folder
+npm run build      # Creates optimized dist/ folder
 npm run preview    # Test production build locally
 ```
 
-### GitHub Pages Deployment
-The project is ready for GitHub Pages deployment. The build output will be in the `dist/` folder.
+### Environment Configuration
+```bash
+# Required environment variables
+VITE_OPENAI_API_KEY=sk-your-key-here  # Optional for demo mode
+```
 
-## Next Steps
-
-1. **Implement Core Methods** - Start with basic add/remove functionality
-2. **Add Visual Feedback** - Implement animations and transitions
-3. **Create Component Library** - Build reusable AI-manipulable components
-4. **Add Persistence** - Save state to localStorage
-5. **Implement Undo/Redo** - Add action history management
-6. **Add Voice Commands** - Integrate speech recognition for AI commands
+The application gracefully falls back to mock AI mode when no API key is provided, ensuring functionality for stakeholder demonstrations.

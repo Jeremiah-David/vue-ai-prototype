@@ -1,19 +1,15 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
         <!-- Navigation -->
         <nav class="relative z-10 flex items-center justify-between p-6 lg:px-8">
-            <div class="flex items-center">
+            <div class="flex items-center space-x-6">
                 <div class="text-2xl font-bold text-white">
-                    AI<span class="text-purple-400">Alpha</span>
-                    <span class="text-sm text-gray-400 ml-2">Event Creator</span>
+                    AI<span class="text-blue-400">Alpha</span>
                 </div>
-            </div>
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
-                <a href="#demo" class="text-gray-300 hover:text-white transition-colors">Demo</a>
-                <button
-                    class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full transition-all transform hover:scale-105">
-                    Get Started
+                <button @click="showDocumentation = true"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center space-x-2">
+                    <span>📖</span>
+                    <span>Documentation</span>
                 </button>
             </div>
         </nav>
@@ -23,22 +19,23 @@
             <!-- Background Effects -->
             <div class="absolute inset-0 overflow-hidden">
                 <div
-                    class="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse">
+                    class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse">
                 </div>
                 <div
                     class="absolute top-1/3 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000">
                 </div>
                 <div
-                    class="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000">
+                    class="absolute bottom-1/4 left-1/3 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000">
                 </div>
             </div>
 
             <div class="relative z-10 text-center max-w-5xl mx-auto">
                 <!-- Main Headline -->
                 <h1 class="text-6xl md:text-8xl font-bold text-white mb-8 leading-tight">
+                    Jeremiah's<br>
                     AI-Driven
                     <span
-                        class="block bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+                        class="block bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
                         Event Creation
                     </span>
                 </h1>
@@ -59,14 +56,17 @@
 
                     <!-- Command Input -->
                     <div class="mb-6">
-                        <div class="relative">
-                            <input v-model="currentCommand" @keyup.enter="processCommand" type="text"
+                        <div class="space-y-3">
+                            <textarea v-model="currentCommand" @keyup.ctrl.enter="processCommand"
                                 placeholder="Try: 'Create a conference with pro and amateur tickets' or 'Make a festival with children and adult tickets and waitlist'"
-                                class="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20" />
-                            <button @click="processCommand" :disabled="isProcessing"
-                                class="absolute right-2 top-2 px-6 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white rounded-lg transition-all">
-                                {{ isProcessing ? 'Processing...' : 'Send' }}
-                            </button>
+                                rows="3"
+                                class="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 resize-y min-h-[80px]"></textarea>
+                            <div class="flex justify-end">
+                                <button @click="processCommand" :disabled="isProcessing"
+                                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg transition-all">
+                                    {{ isProcessing ? 'Processing...' : 'Send' }}
+                                </button>
+                            </div>
                         </div>
 
                         <!-- AI Status Indicator -->
@@ -118,14 +118,14 @@
                         </h4>
 
                         <!-- Event Name -->
-                        <div class="mb-4 p-4 bg-purple-600/20 border border-purple-400/30 rounded-lg">
-                            <h5 class="text-sm font-semibold text-purple-300 mb-1">Event Name</h5>
+                        <div class="mb-4 p-4 bg-blue-600/20 border border-blue-400/30 rounded-lg">
+                            <h5 class="text-sm font-semibold text-blue-300 mb-1">Event Name</h5>
                             <p class="text-white text-lg">{{ eventName || 'No event name set' }}</p>
                         </div>
 
                         <!-- Event Description -->
-                        <div class="mb-4 p-4 bg-blue-600/20 border border-blue-400/30 rounded-lg">
-                            <h5 class="text-sm font-semibold text-blue-300 mb-1">Description</h5>
+                        <div class="mb-4 p-4 bg-indigo-600/20 border border-indigo-400/30 rounded-lg">
+                            <h5 class="text-sm font-semibold text-indigo-300 mb-1">Description</h5>
                             <p class="text-white">{{ eventDescription || 'No description set' }}</p>
                         </div>
 
@@ -136,10 +136,11 @@
                                 <h5 class="text-sm font-semibold text-green-300 mb-2">Ticket Types</h5>
                                 <div v-if="ticketTypes.length === 0" class="text-white">No ticket types set</div>
                                 <div v-else class="space-y-2">
-                                    <div v-for="ticket in ticketTypes" :key="ticket.id" 
-                                         class="flex items-center justify-between p-2 bg-white/10 rounded">
+                                    <div v-for="ticket in ticketTypes" :key="ticket.id"
+                                        class="flex items-center justify-between p-2 bg-white/10 rounded">
                                         <span class="text-white">{{ ticket.name }}</span>
-                                        <span v-if="ticket.price" class="text-green-300 text-sm">${{ ticket.price }}</span>
+                                        <span v-if="ticket.price" class="text-green-300 text-sm">${{ ticket.price
+                                            }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -148,7 +149,9 @@
                             <div class="p-4 bg-orange-600/20 border border-orange-400/30 rounded-lg">
                                 <h5 class="text-sm font-semibold text-orange-300 mb-1">Waitlist</h5>
                                 <div class="flex items-center space-x-2">
-                                    <div :class="[waitlistEnabled ? 'bg-green-500' : 'bg-gray-500', 'w-3 h-3 rounded-full']"></div>
+                                    <div
+                                        :class="[waitlistEnabled ? 'bg-green-500' : 'bg-gray-500', 'w-3 h-3 rounded-full']">
+                                    </div>
                                     <span class="text-white">{{ waitlistEnabled ? 'Enabled' : 'Disabled' }}</span>
                                 </div>
                             </div>
@@ -158,13 +161,14 @@
                     <!-- Demo Examples -->
                     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <button @click="currentCommand = 'Create a tech conference in San Francisco'; processCommand()"
-                            class="p-4 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-400/30 rounded-lg text-left transition-all">
-                            <div class="text-purple-300 font-semibold mb-1">Tech Conference</div>
+                            class="p-4 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-400/30 rounded-lg text-left transition-all">
+                            <div class="text-blue-300 font-semibold mb-1">Tech Conference</div>
                             <div class="text-gray-400 text-sm">Create a technology conference</div>
                         </button>
-                        <button @click="currentCommand = 'Make a music festival with children and adult tickets and waitlist enabled'; processCommand()"
-                            class="p-4 bg-pink-600/20 hover:bg-pink-600/30 border border-pink-400/30 rounded-lg text-left transition-all">
-                            <div class="text-pink-300 font-semibold mb-1">Music Festival</div>
+                        <button
+                            @click="currentCommand = 'Make a music festival with children and adult tickets and waitlist enabled'; processCommand()"
+                            class="p-4 bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-400/30 rounded-lg text-left transition-all">
+                            <div class="text-cyan-300 font-semibold mb-1">Music Festival</div>
                             <div class="text-gray-400 text-sm">Festival with multiple ticket types</div>
                         </button>
                     </div>
@@ -194,9 +198,9 @@
 
                 <div class="grid md:grid-cols-3 gap-8">
                     <div
-                        class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-purple-400/50 transition-all transform hover:scale-105">
+                        class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-blue-400/50 transition-all transform hover:scale-105">
                         <div
-                            class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl mb-6 flex items-center justify-center">
+                            class="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl mb-6 flex items-center justify-center">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
@@ -231,9 +235,9 @@
                     </div>
 
                     <div
-                        class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-pink-400/50 transition-all transform hover:scale-105">
+                        class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-indigo-400/50 transition-all transform hover:scale-105">
                         <div
-                            class="w-12 h-12 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl mb-6 flex items-center justify-center">
+                            class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl mb-6 flex items-center justify-center">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -249,6 +253,245 @@
                 </div>
             </div>
         </section>
+    </div>
+
+    <!-- Documentation Modal -->
+    <div v-if="showDocumentation"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-gray-700 rounded-2xl max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-slate-900 border-b border-gray-700 p-6 flex items-center justify-between">
+                <h2 class="text-2xl font-bold text-white flex items-center space-x-2">
+                    <span>📖</span>
+                    <span>AI Alpha Documentation</span>
+                </h2>
+                <button @click="showDocumentation = false"
+                    class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-all">
+                    ← Back to Demo
+                </button>
+            </div>
+
+            <div class="p-6 prose prose-invert max-w-none">
+                <!-- Quick Start -->
+                <section class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center space-x-2">
+                        <span>🚀</span>
+                        <span>Quick Start Guide</span>
+                    </h3>
+                    <div class="bg-blue-900/20 border border-blue-400/30 rounded-lg p-4 mb-4">
+                        <p class="text-blue-300 font-semibold mb-2">What is AI Alpha?</p>
+                        <p class="text-gray-300">AI Alpha is a prototype demonstrating AI-driven event creation. Simply
+                            type natural language commands to create events, set ticket types, and manage waitlists.</p>
+                    </div>
+
+                    <h4 class="text-lg font-semibold text-white mb-3">Try These Commands:</h4>
+                    <div class="space-y-2 mb-4">
+                        <div class="bg-green-900/20 border border-green-400/30 rounded-lg p-3">
+                            <code class="text-green-300">"Create a tech conference in San Francisco"</code>
+                        </div>
+                        <div class="bg-green-900/20 border border-green-400/30 rounded-lg p-3">
+                            <code class="text-green-300">"Make a music festival with VIP and general tickets"</code>
+                        </div>
+                        <div class="bg-green-900/20 border border-green-400/30 rounded-lg p-3">
+                            <code class="text-green-300">"Add children and adult tickets with waitlist enabled"</code>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- AI Capabilities -->
+                <section class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center space-x-2">
+                        <span>🤖</span>
+                        <span>AI Capabilities</span>
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-blue-900/20 border border-blue-400/30 rounded-lg p-4">
+                            <h4 class="text-blue-300 font-semibold mb-2">Event Setup</h4>
+                            <ul class="text-gray-300 space-y-1 text-sm">
+                                <li>• Set event names and descriptions</li>
+                                <li>• Configure event details automatically</li>
+                                <li>• Intelligent context understanding</li>
+                            </ul>
+                        </div>
+                        <div class="bg-cyan-900/20 border border-cyan-400/30 rounded-lg p-4">
+                            <h4 class="text-cyan-300 font-semibold mb-2">Ticket Management</h4>
+                            <ul class="text-gray-300 space-y-1 text-sm">
+                                <li>• Multiple ticket types (VIP, General, etc.)</li>
+                                <li>• Age-based categories (Children, Adults)</li>
+                                <li>• Custom pricing and naming</li>
+                            </ul>
+                        </div>
+                        <div class="bg-indigo-900/20 border border-indigo-400/30 rounded-lg p-4">
+                            <h4 class="text-indigo-300 font-semibold mb-2">Waitlist Control</h4>
+                            <ul class="text-gray-300 space-y-1 text-sm">
+                                <li>• Enable/disable waitlists</li>
+                                <li>• Intelligent capacity management</li>
+                                <li>• Automatic configuration</li>
+                            </ul>
+                        </div>
+                        <div class="bg-orange-900/20 border border-orange-400/30 rounded-lg p-4">
+                            <h4 class="text-orange-300 font-semibold mb-2">Natural Language</h4>
+                            <ul class="text-gray-300 space-y-1 text-sm">
+                                <li>• Conversational commands</li>
+                                <li>• Context-aware responses</li>
+                                <li>• Error handling and suggestions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Technical Details -->
+                <section class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center space-x-2">
+                        <span>⚙️</span>
+                        <span>Technical Implementation</span>
+                    </h3>
+                    <div class="bg-gray-800/50 border border-gray-600 rounded-lg p-4 mb-4">
+                        <h4 class="text-gray-300 font-semibold mb-2">Security Architecture</h4>
+                        <p class="text-gray-400 text-sm mb-2">All AI commands are processed through a secure registry
+                            system that validates and controls what actions the AI can perform.</p>
+                        <div class="text-xs text-gray-500">
+                            <strong>AI Manipulation Registry:</strong> Only predefined, safe methods can be executed<br>
+                            <strong>Validation Layer:</strong> All inputs are sanitized and validated<br>
+                            <strong>Logging System:</strong> Complete audit trail of all AI actions
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-800/50 border border-gray-600 rounded-lg p-4">
+                        <h4 class="text-gray-300 font-semibold mb-2">Technology Stack</h4>
+                        <div class="grid md:grid-cols-3 gap-3 text-sm">
+                            <div>
+                                <strong class="text-blue-300">Frontend:</strong>
+                                <ul class="text-gray-400 mt-1">
+                                    <li>• Vue 3 Composition API</li>
+                                    <li>• Vite Build Tool</li>
+                                    <li>• Tailwind CSS</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong class="text-green-300">AI Integration:</strong>
+                                <ul class="text-gray-400 mt-1">
+                                    <li>• OpenAI GPT-4</li>
+                                    <li>• Function Calling</li>
+                                    <li>• Secure Registry</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong class="text-indigo-300">Architecture:</strong>
+                                <ul class="text-gray-400 mt-1">
+                                    <li>• Enterprise Ready</li>
+                                    <li>• Scalable Design</li>
+                                    <li>• Security First</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Usage Examples -->
+                <section class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center space-x-2">
+                        <span>💡</span>
+                        <span>Usage Examples</span>
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div class="bg-slate-800 border border-gray-600 rounded-lg p-4">
+                            <h4 class="text-white font-semibold mb-2">Creating a Technology Conference</h4>
+                            <div class="bg-black/30 rounded p-3 mb-2">
+                                <code
+                                    class="text-green-400">"Create a tech innovation conference in Silicon Valley with professional and student tickets"</code>
+                            </div>
+                            <p class="text-gray-400 text-sm">This command will automatically set up an event with
+                                appropriate name, description, and multiple ticket types.</p>
+                        </div>
+
+                        <div class="bg-slate-800 border border-gray-600 rounded-lg p-4">
+                            <h4 class="text-white font-semibold mb-2">Setting Up a Music Festival</h4>
+                            <div class="bg-black/30 rounded p-3 mb-2">
+                                <code
+                                    class="text-green-400">"Make a summer music festival with VIP, general admission, and children tickets plus waitlist"</code>
+                            </div>
+                            <p class="text-gray-400 text-sm">Creates a festival event with multiple ticket tiers and
+                                enables the waitlist functionality.</p>
+                        </div>
+
+                        <div class="bg-slate-800 border border-gray-600 rounded-lg p-4">
+                            <h4 class="text-white font-semibold mb-2">Corporate Training Event</h4>
+                            <div class="bg-black/30 rounded p-3 mb-2">
+                                <code
+                                    class="text-green-400">"Create a leadership training workshop for executives"</code>
+                            </div>
+                            <p class="text-gray-400 text-sm">Generates a professional training event with appropriate
+                                settings and general admission tickets.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Enterprise Features -->
+                <section class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center space-x-2">
+                        <span>🏢</span>
+                        <span>Enterprise Ready Features</span>
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-blue-900/20 border border-blue-400/30 rounded-lg p-4">
+                            <h4 class="text-blue-300 font-semibold mb-2">Security & Compliance</h4>
+                            <ul class="text-gray-300 space-y-1 text-sm">
+                                <li>• Controlled AI function execution</li>
+                                <li>• Complete audit logging</li>
+                                <li>• Input validation and sanitization</li>
+                                <li>• Rate limiting and usage controls</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-900/20 border border-green-400/30 rounded-lg p-4">
+                            <h4 class="text-green-300 font-semibold mb-2">Scalability</h4>
+                            <ul class="text-gray-300 space-y-1 text-sm">
+                                <li>• Modular component architecture</li>
+                                <li>• Extensible registry system</li>
+                                <li>• Production-ready patterns</li>
+                                <li>• Performance optimized</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FAQ -->
+                <section>
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center space-x-2">
+                        <span>❓</span>
+                        <span>Frequently Asked Questions</span>
+                    </h3>
+                    <div class="space-y-3">
+                        <details class="bg-slate-800 border border-gray-600 rounded-lg p-4">
+                            <summary class="text-white font-semibold cursor-pointer">How secure is the AI integration?
+                            </summary>
+                            <p class="text-gray-400 mt-2 text-sm">The AI can only execute predefined methods through our
+                                secure registry system. All commands are validated, logged, and sandboxed for maximum
+                                security.</p>
+                        </details>
+                        <details class="bg-slate-800 border border-gray-600 rounded-lg p-4">
+                            <summary class="text-white font-semibold cursor-pointer">Can I extend the AI capabilities?
+                            </summary>
+                            <p class="text-gray-400 mt-2 text-sm">Yes! The registry system is designed to be extensible.
+                                New functions can be added to the registry with proper validation and security measures.
+                            </p>
+                        </details>
+                        <details class="bg-slate-800 border border-gray-600 rounded-lg p-4">
+                            <summary class="text-white font-semibold cursor-pointer">What happens if OpenAI is
+                                unavailable?</summary>
+                            <p class="text-gray-400 mt-2 text-sm">The system includes graceful fallback to mock AI
+                                responses, ensuring the demo continues to work even without API connectivity.</p>
+                        </details>
+                        <details class="bg-slate-800 border border-gray-600 rounded-lg p-4">
+                            <summary class="text-white font-semibold cursor-pointer">Is this production ready?</summary>
+                            <p class="text-gray-400 mt-2 text-sm">This is a prototype built with enterprise-ready
+                                patterns. The architecture, security model, and code quality are designed for production
+                                scaling.</p>
+                        </details>
+                    </div>
+                </section>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -276,6 +519,9 @@ const currentCommand = ref('')
 const isProcessing = ref(false)
 const commandHistory = ref([])
 
+// Documentation modal state
+const showDocumentation = ref(false)
+
 // Get the 4 available event methods from the registry
 const {
     setEventName,
@@ -292,8 +538,6 @@ const processCommand = async () => {
     isProcessing.value = true
 
     try {
-        console.log('🎫 Processing event command:', command)
-
         // Process the command through AI service
         const result = await aiService.processCommand(command, manipulationRegistry)
 
@@ -305,14 +549,11 @@ const processCommand = async () => {
             timestamp: new Date().toLocaleTimeString(),
         })
 
-        console.log('✅ Event command completed:', result)
-
         // Clear the input on success
         if (result.success) {
             currentCommand.value = ''
         }
     } catch (error) {
-        console.error('❌ Event command failed:', error)
         commandHistory.value.push({
             command: command,
             success: false,
@@ -332,7 +573,6 @@ const clearEvent = () => {
     waitlistEnabled.value = false
     commandHistory.value = []
     currentCommand.value = ''
-    console.log('🎫 Event cleared')
 }
 
 // Demo functions
