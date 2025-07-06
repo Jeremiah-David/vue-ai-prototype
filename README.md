@@ -53,6 +53,51 @@ setTheme(themeName)            // Apply visual themes
 changeBackground(style)        // Modify background styling
 ```
 
+## 🔐 AI Manipulation Registry
+
+### Security-First Architecture
+This application uses a **dedicated AI Manipulation Registry** that provides enterprise-level security and clear boundaries for AI interactions:
+
+- **📋 Explicit Method Registry**: All AI-accessible methods are defined in `/src/services/aiManipulationRegistry.js`
+- **🛡️ Security Boundary**: AI can ONLY execute methods from the registry - no arbitrary code execution
+- **📊 Audit Trail**: Every AI action is logged with timestamps and parameters
+- **✅ Input Validation**: All parameters are validated before execution
+- **🚫 CSS Injection Protection**: Background styles are sanitized for security
+
+### What AI Can Manipulate
+The AI has access to these **controlled, secure methods**:
+
+```javascript
+// UI Element Creation (with validation)
+addButton(text, id, style)      // Create buttons with color/size options
+addCard(title, content, style)  // Generate information cards
+addCounter(label, style)        // Add progress tracking counters
+addImage(content, alt, style)   // Place emoji/text images
+addStoryElement(type, content)  // Create titles/paragraphs/characters
+
+// State Manipulation (with limits)
+incrementCounter(id, amount)    // Increment counters (max 1000)
+changeBackground(style)         // Apply CSS backgrounds (sanitized)
+setTheme(themeName)            // Apply predefined themes only
+
+// Read-Only Utilities
+getElementCount(type)          // Count UI elements
+getActiveTheme()               // Get current theme
+getActionLog(limit)            // View action history
+```
+
+### Security Features
+- **✅ Whitelist Approach**: Only pre-approved methods can be executed
+- **✅ Parameter Validation**: Text length limits, enum validation, type checking
+- **✅ Resource Protection**: Memory limits, action logging, automatic cleanup
+- **✅ Injection Prevention**: CSS and script injection protection
+- **✅ Audit Compliance**: Complete action history with timestamps
+
+### Quick Start Files
+- **📖 Simple Overview**: [`WHAT_AI_CAN_DO.md`](./WHAT_AI_CAN_DO.md) - Easy-to-read summary
+- **📚 Detailed Docs**: [`AI_MANIPULATION_REGISTRY.md`](./AI_MANIPULATION_REGISTRY.md) - Complete documentation  
+- **🧪 Test Suite**: [`tests/aiRegistryTests.js`](./tests/aiRegistryTests.js) - Validation tests
+
 ## ⚡ Quick Start
 
 ### Prerequisites
@@ -240,23 +285,3 @@ This is an enterprise prototype for stakeholder demonstration. For contributions
 src/
 ├── components/     # Vue components
 ├── assets/        # Static assets
-├── App.vue        # Main application component
-├── main.js        # Application entry point
-└── style.css      # Global styles
-```
-
-## Development Guidelines
-
-- Use Vue 3 Composition API with `<script setup>`
-- Keep components simple and focused
-- Use reactive references for state management
-- Implement clear, descriptive method names for AI interaction
-- Follow Vue 3 best practices and conventions
-
-## Contributing
-
-This is a prototype project for testing AI-driven UI manipulation features. Feel free to experiment and add new manipulation methods.
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).

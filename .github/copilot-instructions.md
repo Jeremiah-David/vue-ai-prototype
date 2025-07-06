@@ -9,6 +9,7 @@ This is a Vue 3 prototype application for testing AI-driven UI manipulation feat
 - Vite for build tooling
 - Focus on simple, manipulable UI components
 - Prototype for AI-driven event management features
+- **NEW: AI Manipulation Registry for secure method execution**
 
 ## Code Style Guidelines
 - Use Vue 3 Composition API with `<script setup>`
@@ -17,7 +18,28 @@ This is a Vue 3 prototype application for testing AI-driven UI manipulation feat
 - Implement clear, descriptive method names for AI interaction
 - Follow Vue 3 best practices and conventions
 
-## AI Manipulation Features
+## AI Manipulation Architecture (UPDATED)
+**IMPORTANT: All AI-manipulable methods are now centralized in the AI Manipulation Registry**
+
+### Security Model
+- AI can ONLY execute methods defined in `src/services/aiManipulationRegistry.js`
+- Registry provides validation, logging, and security boundaries
+- No direct method execution - everything goes through the registry
+
+### Current Implementation Status
+- ✅ AI Manipulation Registry created with full validation
+- ✅ AI Service updated to use registry exclusively  
+- ✅ Home.vue component refactored to use registry
+- ✅ Security boundaries enforced
+- 🔄 Testing and validation needed
+- ❌ Documentation needs updating (do this LAST after testing)
+
+## Development Priority
+1. Test the new registry implementation
+2. Validate all AI commands work through registry
+3. Ensure security boundaries are working
+4. Fix any runtime issues
+5. Only then update README and user documentation
 When implementing AI manipulation features, follow these patterns:
 
 ### Method Naming Convention

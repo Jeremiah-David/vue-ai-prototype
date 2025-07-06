@@ -1,9 +1,9 @@
 {
-  "recommendations": [
-    // Tailwind CSS
-    "bradlc.vscode-tailwindcss",
+    "recommendations": [
+        // Tailwind CSS
+        "bradlc.vscode-tailwindcss",
 
-    // Code Formatting
-    "esbenp.prettier-vscode"
-  ]
+        // Code Formatting
+        "esbenp.prettier-vscode"
+    ]
 }
