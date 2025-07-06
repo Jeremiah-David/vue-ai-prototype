@@ -61,7 +61,7 @@
                     <div class="mb-6">
                         <div class="relative">
                             <input v-model="currentCommand" @keyup.enter="processCommand" type="text"
-                                placeholder="Try: 'Create a conference with pro and amateur tickets' or 'Make a festival with children and adult tickets and waitlist'"
+                                placeholder="Try: 'Create a tech conference in San Francisco' or 'Make a music festival with VIP tickets and waitlist'"
                                 class="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20" />
                             <button @click="processCommand" :disabled="isProcessing"
                                 class="absolute right-2 top-2 px-6 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white rounded-lg transition-all">
@@ -129,19 +129,12 @@
                             <p class="text-white">{{ eventDescription || 'No description set' }}</p>
                         </div>
 
-                        <!-- Ticket Types and Waitlist -->
-                        <div class="grid grid-cols-1 gap-4">
-                            <!-- Ticket Types -->
+                        <!-- Ticket Info and Waitlist -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Ticket Name -->
                             <div class="p-4 bg-green-600/20 border border-green-400/30 rounded-lg">
-                                <h5 class="text-sm font-semibold text-green-300 mb-2">Ticket Types</h5>
-                                <div v-if="ticketTypes.length === 0" class="text-white">No ticket types set</div>
-                                <div v-else class="space-y-2">
-                                    <div v-for="ticket in ticketTypes" :key="ticket.id" 
-                                         class="flex items-center justify-between p-2 bg-white/10 rounded">
-                                        <span class="text-white">{{ ticket.name }}</span>
-                                        <span v-if="ticket.price" class="text-green-300 text-sm">${{ ticket.price }}</span>
-                                    </div>
-                                </div>
+                                <h5 class="text-sm font-semibold text-green-300 mb-1">Ticket Type</h5>
+                                <p class="text-white">{{ ticketName }}</p>
                             </div>
 
                             <!-- Waitlist Status -->
@@ -162,10 +155,10 @@
                             <div class="text-purple-300 font-semibold mb-1">Tech Conference</div>
                             <div class="text-gray-400 text-sm">Create a technology conference</div>
                         </button>
-                        <button @click="currentCommand = 'Make a music festival with children and adult tickets and waitlist enabled'; processCommand()"
+                        <button @click="currentCommand = 'Make a music festival with VIP tickets and waitlist enabled'; processCommand()"
                             class="p-4 bg-pink-600/20 hover:bg-pink-600/30 border border-pink-400/30 rounded-lg text-left transition-all">
                             <div class="text-pink-300 font-semibold mb-1">Music Festival</div>
-                            <div class="text-gray-400 text-sm">Festival with multiple ticket types</div>
+                            <div class="text-gray-400 text-sm">Festival with VIP tickets</div>
                         </button>
                     </div>
 
@@ -254,20 +247,20 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import aiService from '../services/aiService.js'
-import { createAIManipulationRegistry } from '../services/aiManipulationRegistry.js'
+import aiService from '@/services/aiService.js'
+import { createAIManipulationRegistry } from '@/services/aiManipulationRegistry.js'
 
 // Event state (reactive)
 const eventName = ref('')
 const eventDescription = ref('')
-const ticketTypes = ref([]) // Changed from ticketName to ticketTypes array
+const ticketName = ref('General Admission')
 const waitlistEnabled = ref(false)
 
 // Create the AI manipulation registry with event state
 const manipulationRegistry = createAIManipulationRegistry({
     eventName,
     eventDescription,
-    ticketTypes,
+    ticketName,
     waitlistEnabled,
 })
 
@@ -280,7 +273,7 @@ const commandHistory = ref([])
 const {
     setEventName,
     setEventDescription,
-    addTicketType, // Changed from setTicketName
+    setTicketName,
     toggleWaitlist,
 } = manipulationRegistry.getAvailableMethods()
 
@@ -328,7 +321,7 @@ const processCommand = async () => {
 const clearEvent = () => {
     eventName.value = ''
     eventDescription.value = ''
-    ticketTypes.value = [] // Changed from ticketName
+    ticketName.value = 'General Admission'
     waitlistEnabled.value = false
     commandHistory.value = []
     currentCommand.value = ''
@@ -341,7 +334,7 @@ const createTechConferenceDemo = async () => {
     await new Promise((resolve) => setTimeout(resolve, 300))
     setEventDescription('Join industry leaders for cutting-edge technology discussions, networking, and innovation showcases.')
     await new Promise((resolve) => setTimeout(resolve, 300))
-    addTicketType('General Admission')
+    setTicketName('General Admission')
     await new Promise((resolve) => setTimeout(resolve, 300))
     toggleWaitlist(false)
 }
@@ -351,11 +344,7 @@ const createMusicFestivalDemo = async () => {
     await new Promise((resolve) => setTimeout(resolve, 300))
     setEventDescription('Three days of amazing music, food trucks, and unforgettable experiences under the stars.')
     await new Promise((resolve) => setTimeout(resolve, 300))
-    addTicketType('Children')
-    await new Promise((resolve) => setTimeout(resolve, 200))
-    addTicketType('Adults') 
-    await new Promise((resolve) => setTimeout(resolve, 200))
-    addTicketType('VIP')
+    setTicketName('VIP')
     await new Promise((resolve) => setTimeout(resolve, 300))
     toggleWaitlist(true)
 }
@@ -366,7 +355,7 @@ defineExpose({
     manipulationRegistry,
     setEventName,
     setEventDescription,
-    addTicketType, // Changed from setTicketName
+    setTicketName,
     toggleWaitlist,
 
     // Component methods
@@ -378,7 +367,7 @@ defineExpose({
     // State (read-only access)
     eventName,
     eventDescription,
-    ticketTypes, // Changed from ticketName
+    ticketName,
     waitlistEnabled,
 
     // Utility methods

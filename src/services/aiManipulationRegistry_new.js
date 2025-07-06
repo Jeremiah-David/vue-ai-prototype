@@ -11,6 +11,20 @@
  */
 
 /**
+ * Available event types that can be created
+ */
+export const EVENT_TYPES = {
+    CONFERENCE: 'conference',
+    WORKSHOP: 'workshop',
+    FESTIVAL: 'festival',
+    MEETUP: 'meetup',
+    SEMINAR: 'seminar',
+    CONCERT: 'concert',
+    TRAINING: 'training',
+    NETWORKING: 'networking',
+}
+
+/**
  * Available ticket types for events
  */
 export const TICKET_TYPES = {
@@ -49,7 +63,7 @@ export class AIManipulationRegistry {
         const required = [
             'eventName',
             'eventDescription', 
-            'ticketTypes', // Changed from ticketName to ticketTypes (array)
+            'ticketName',
             'waitlistEnabled'
         ]
         const missing = required.filter((prop) => !(prop in this.eventState))
@@ -91,7 +105,7 @@ export class AIManipulationRegistry {
             // Event Creation Methods (ONLY THESE 4)
             setEventName: this.setEventName.bind(this),
             setEventDescription: this.setEventDescription.bind(this),
-            addTicketType: this.addTicketType.bind(this), // Changed from setTicketName
+            setTicketName: this.setTicketName.bind(this),
             toggleWaitlist: this.toggleWaitlist.bind(this),
         }
     }
@@ -161,55 +175,33 @@ export class AIManipulationRegistry {
     }
 
     /**
-     * Add a ticket type to the event
+     * Set the ticket name/type
      *
-     * @param {string} name - The ticket type name (required)
-     * @param {number} price - The ticket price (optional)
+     * @param {string} name - The ticket name (defaults to "General Admission")
      * @returns {boolean} - Success status
      */
-    addTicketType(name, price = null) {
+    setTicketName(name = 'General Admission') {
         try {
             // Validation
-            if (!name || typeof name !== 'string') {
-                throw new Error('Ticket type name must be a non-empty string')
+            if (typeof name !== 'string') {
+                throw new Error('Ticket name must be a string')
             }
 
             if (name.length < 2 || name.length > 50) {
-                throw new Error('Ticket type name must be between 2 and 50 characters')
-            }
-
-            if (price !== null && (typeof price !== 'number' || price < 0)) {
-                throw new Error('Ticket price must be a positive number or null')
+                throw new Error('Ticket name must be between 2 and 50 characters')
             }
 
             // Sanitize input
             const sanitizedName = name.trim().replace(/[<>]/g, '')
 
-            // Create ticket type object
-            const ticketType = {
-                name: sanitizedName,
-                price: price,
-                id: Date.now() + Math.random()
-            }
+            // Update state
+            this.eventState.ticketName.value = sanitizedName
 
-            // Check if ticket type already exists
-            const existingIndex = this.eventState.ticketTypes.value.findIndex(
-                ticket => ticket.name.toLowerCase() === sanitizedName.toLowerCase()
-            )
-
-            if (existingIndex >= 0) {
-                // Update existing ticket type
-                this.eventState.ticketTypes.value[existingIndex] = ticketType
-            } else {
-                // Add new ticket type
-                this.eventState.ticketTypes.value.push(ticketType)
-            }
-
-            this.logAction('addTicketType', { name: sanitizedName, price }, true)
+            this.logAction('setTicketName', { name: sanitizedName }, true)
             return true
         } catch (error) {
-            console.error('Error adding ticket type:', error)
-            this.logAction('addTicketType', { name, price }, false)
+            console.error('Error setting ticket name:', error)
+            this.logAction('setTicketName', { name }, false)
             throw error
         }
     }
@@ -253,7 +245,7 @@ export class AIManipulationRegistry {
         return {
             eventName: this.eventState.eventName.value,
             eventDescription: this.eventState.eventDescription.value,
-            ticketTypes: this.eventState.ticketTypes.value, // Changed from ticketName
+            ticketName: this.eventState.ticketName.value,
             waitlistEnabled: this.eventState.waitlistEnabled.value,
         }
     }
@@ -273,6 +265,7 @@ export function createAIManipulationRegistry(eventState) {
  * Export default configuration for easy access
  */
 export default {
+    EVENT_TYPES,
     TICKET_TYPES,
     AIManipulationRegistry,
     createAIManipulationRegistry,

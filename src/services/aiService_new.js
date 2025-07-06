@@ -1,5 +1,6 @@
 import OpenAI from 'openai'
 import {
+    EVENT_TYPES,
     TICKET_TYPES,
 } from './aiManipulationRegistry.js'
 
@@ -55,84 +56,69 @@ class AIService {
     }
 
     /**
-     * Define the available event creation tools for OpenAI
+     * Define the available event creation functions for OpenAI
      * These correspond exactly to the 4 event methods in the AI Manipulation Registry
      *
      * SECURITY NOTE: This function schema must match the registry methods exactly
      */
-    getAvailableTools() {
+    getAvailableFunctions() {
         return [
             {
-                type: 'function',
-                function: {
-                    name: 'setEventName',
-                    description: 'Set the name of the event being created',
-                    parameters: {
-                        type: 'object',
-                        properties: {
-                            name: {
-                                type: 'string',
-                                description: 'The name of the event (3-100 characters)',
-                            },
+                name: 'setEventName',
+                description: 'Set the name of the event being created',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        name: {
+                            type: 'string',
+                            description: 'The name of the event (3-100 characters)',
                         },
-                        required: ['name'],
                     },
-                }
+                    required: ['name'],
+                },
             },
             {
-                type: 'function',
-                function: {
-                    name: 'setEventDescription',
-                    description: 'Set a detailed description for the event',
-                    parameters: {
-                        type: 'object',
-                        properties: {
-                            description: {
-                                type: 'string',
-                                description: 'A detailed description of the event (10-500 characters)',
-                            },
+                name: 'setEventDescription',
+                description: 'Set a detailed description for the event',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        description: {
+                            type: 'string',
+                            description: 'A detailed description of the event (10-500 characters)',
                         },
-                        required: ['description'],
                     },
-                }
+                    required: ['description'],
+                },
             },
             {
-                type: 'function',
-                function: {
-                    name: 'addTicketType',
-                    description: 'Add a ticket type to the event. Can be called multiple times for different ticket types.',
-                    parameters: {
-                        type: 'object',
-                        properties: {
-                            name: {
-                                type: 'string',
-                                description: 'The ticket type name (e.g., "Children", "Adults", "VIP", "Pro", "Amateur")',
-                            },
-                            price: {
-                                type: 'number',
-                                description: 'Optional ticket price',
-                            },
+                name: 'setTicketName',
+                description: 'Set the name/type of tickets for the event',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        name: {
+                            type: 'string',
+                            description: 'The ticket name/type (defaults to "General Admission")',
+                            enum: Object.values(TICKET_TYPES),
                         },
-                        required: ['name'],
                     },
-                }
+                    required: ['name'],
+                },
             },
             {
-                type: 'function',
-                function: {
-                    name: 'toggleWaitlist',
-                    description: 'Enable or disable the waitlist for the event',
-                    parameters: {
-                        type: 'object',
-                        properties: {
-                            enabled: {
-                                type: 'boolean',
-                                description: 'Whether to enable (true) or disable (false) the waitlist',
-                            },
+                name: 'toggleWaitlist',
+                description: 'Enable or disable the waitlist for the event',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        enabled: {
+                            type: 'boolean',
+                            description: 'Whether to enable (true) or disable (false) the waitlist',
                         },
-                        required: ['enabled'],
                     },
-                }
+                    required: ['enabled'],
+                },
             },
         ]
     }
@@ -168,19 +154,19 @@ class AIService {
                     role: 'system',
                     content: `You are an AI assistant that helps create events through a web interface. 
 
-Your capabilities are:
+Your only capabilities are:
 1. setEventName(name) - Set the event name
 2. setEventDescription(description) - Set the event description
-3. addTicketType(name, price) - Add a ticket type (can be called multiple times for different types)
+3. setTicketName(name) - Set the ticket type/name
 4. toggleWaitlist(enabled) - Enable/disable waitlist
 
-IMPORTANT: You can and should call MULTIPLE functions in a single response when the user provides multiple details. For ticket types, call addTicketType() multiple times for each type mentioned.
+You can ONLY use these 4 functions. When a user asks you to create an event, analyze their request and use the appropriate functions to set up the event details.
 
 Examples:
-- "Create a tech conference" → setEventName("Tech Conference"), setEventDescription("A conference for technology professionals"), addTicketType("General Admission")
-- "Make a music festival with children and adult tickets" → setEventName("Music Festival"), setEventDescription("A celebration of music and arts"), addTicketType("Children"), addTicketType("Adults")
-- "tech event with pro and amateur tickets and waitlist on" → setEventName("Tech Event"), setEventDescription("A technology event"), addTicketType("Pro"), addTicketType("Amateur"), toggleWaitlist(true)
-- "conference with VIP, Standard, and Student tickets" → setEventName("Conference"), setEventDescription("A professional conference"), addTicketType("VIP"), addTicketType("Standard"), addTicketType("Student")`,
+- "Create a tech conference" → setEventName("Tech Conference"), setEventDescription("A conference for technology professionals"), setTicketName("General Admission"), toggleWaitlist(false)
+- "Make a music festival with VIP tickets and waitlist" → setEventName("Music Festival"), setEventDescription("A celebration of music and arts"), setTicketName("VIP"), toggleWaitlist(true)
+
+Always respond naturally and explain what you're doing.`,
                 },
                 ...this.conversationHistory,
                 {
@@ -189,12 +175,12 @@ Examples:
                 },
             ]
 
-            // Call OpenAI with tools (new format supporting multiple function calls)
+            // Call OpenAI with function calling
             const response = await this.client.chat.completions.create({
                 model: this.model,
                 messages: messages,
-                tools: this.getAvailableTools(),
-                tool_choice: 'auto',
+                functions: this.getAvailableFunctions(),
+                function_call: 'auto',
                 temperature: this.temperature,
                 max_tokens: this.maxTokens,
             })
@@ -202,43 +188,31 @@ Examples:
             const message = response.choices[0].message
             const results = []
 
-            // Handle multiple tool calls
-            if (message.tool_calls && message.tool_calls.length > 0) {
-                for (const toolCall of message.tool_calls) {
-                    const functionName = toolCall.function.name
-                    const functionArgs = JSON.parse(toolCall.function.arguments)
+            // Handle function calls
+            if (message.function_call) {
+                const functionName = message.function_call.name
+                const functionArgs = JSON.parse(message.function_call.arguments)
 
-                    console.log(`🎫 AI calling: ${functionName}`, functionArgs)
+                console.log(`🎫 AI calling: ${functionName}`, functionArgs)
 
-                    try {
-                        // Execute the function through the registry
-                        const result = await this.executeFunctionSafely(
-                            functionName,
-                            functionArgs,
-                            registry
-                        )
+                // Execute the function through the registry
+                const result = await this.executeFunctionSafely(
+                    functionName,
+                    functionArgs,
+                    registry
+                )
 
-                        results.push({
-                            function: functionName,
-                            args: functionArgs,
-                            result: result,
-                        })
-                    } catch (error) {
-                        console.error(`❌ Failed to execute ${functionName}:`, error)
-                        results.push({
-                            function: functionName,
-                            args: functionArgs,
-                            result: false,
-                            error: error.message,
-                        })
-                    }
-                }
+                results.push({
+                    function: functionName,
+                    args: functionArgs,
+                    result: result,
+                })
             }
 
             // Update conversation history
             this.conversationHistory.push(
                 { role: 'user', content: userInput },
-                { role: 'assistant', content: message.content || `Event updated! Executed ${results.length} function(s).` }
+                { role: 'assistant', content: message.content || 'Event updated successfully!' }
             )
 
             // Limit conversation history for cost control
@@ -248,7 +222,7 @@ Examples:
 
             return {
                 success: true,
-                message: message.content || `Event updated successfully! Executed ${results.length} function(s).`,
+                message: message.content || 'Event updated successfully!',
                 functions: results,
                 usage: response.usage,
             }
@@ -288,7 +262,7 @@ Examples:
             const allowedFunctions = [
                 'setEventName',
                 'setEventDescription', 
-                'addTicketType', // Changed from setTicketName
+                'setTicketName',
                 'toggleWaitlist'
             ]
 

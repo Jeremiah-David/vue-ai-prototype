@@ -1,52 +1,54 @@
 # AI Alpha Prototype - Development Task List
 
-**Current Status: AI Manipulation Registry Implementation Complete**
-**Next Priority: Testing and Validation**
+**MAJOR PIVOT: Event Creation Tool Implementation**
+**Current Status: Ready to implement Event Creation Tool pivot**
 
-## CURRENT IMPLEMENTATION STATUS
+## 🔄 CURRENT TASKS (Phase 5: Event Creation Tool Pivot)
 
-### ✅ Phase 3.5: AI Manipulation Registry (COMPLETED)
-- [x] Created centralized AI manipulation registry (`src/services/aiManipulationRegistry.js`)
-- [x] Implemented security boundaries and validation
-- [x] Added comprehensive input validation and sanitization
-- [x] Built audit logging system for all AI actions
-- [x] Updated AI service to use registry exclusively
-- [x] Refactored Home.vue component to use registry
-- [x] Enforced security model - AI can only execute registry methods
-- [x] Added error handling and proper boundaries
+### ✅ 5.1 Event Creation Tool Implementation (COMPLETED)
+**NEW DIRECTION**: Transform from story creation tool to event creation tool
 
-### 🔄 IMMEDIATE NEXT STEPS (Phase 4: Validation)
+#### Required AI Methods (Only these 4 methods are available to AI):
+- [x] **setEventName(name)** - Set the event name
+- [x] **setEventDescription(description)** - Set event description  
+- [x] **setTicketName(name)** - Set ticket name (default: "General Admission")
+- [x] **toggleWaitlist(enabled)** - Toggle waitlist on/off (default: off)
 
-#### 4.1 Testing and Validation (HIGH PRIORITY)
-- [ ] **Test registry implementation in development mode**
-- [ ] **Validate all AI commands work through registry**
-- [ ] **Test mock AI mode functionality**
-- [ ] **Verify security boundaries prevent unauthorized access**
-- [ ] **Test error handling and validation**
-- [ ] **Confirm action logging works correctly**
-- [ ] **Test all theme and color constants**
-- [ ] **Validate story element creation through registry**
+#### Implementation Tasks:
+- [x] **Update AI Manipulation Registry** (`src/services/aiManipulationRegistry.js`)
+  - [x] Remove all story-related methods (addStoryElement, story themes, etc.)
+  - [x] Remove UI element methods (addButton, addCard, addCounter, addImage, etc.)
+  - [x] Add the 4 event creation methods listed above
+  - [x] Update validation and security boundaries
 
-#### 4.2 Bug Fixes and Refinements
-- [ ] Fix any runtime errors discovered during testing
-- [ ] Ensure template renders correctly with new registry structure
-- [ ] Validate that all demo scenarios still work
-- [ ] Test incremental counter functionality
-- [ ] Ensure background/theme changes work properly
+- [x] **Update Home.vue Component**
+  - [x] Replace story elements display with event creation interface
+  - [x] Add event name display section
+  - [x] Add event description display section
+  - [x] Add ticket information display
+  - [x] Add waitlist status indicator (radio button: on/off)
+  - [x] Update demo examples to be event-focused
+  - [x] Remove story-related UI elements and styling helpers
 
-#### 4.3 Integration Testing
-- [ ] Test with real OpenAI API (if configured)
-- [ ] Validate function schema matches registry methods
-- [ ] Test conversation history and context management
-- [ ] Verify cost controls and session limits work
-- [ ] Test fallback to mock mode
+- [x] **Update AI Service** (`src/services/aiService.js`)
+  - [x] Modify function schemas to only include 4 event methods
+  - [x] Update AI prompts to focus on event creation
+  - [x] Remove story-related AI instructions
+  - [x] Add event creation context and examples
 
-### ❌ DOCUMENTATION (DO LAST - AFTER TESTING)
-- [ ] Update README.md with new architecture
-- [ ] Create user guide for registry-based commands
-- [ ] Document security model and boundaries
-- [ ] Update API documentation
-- [ ] Create developer guide for extending registry
+### ✅ 5.2 Testing Event Creation Tool (READY FOR TESTING)
+- [ ] Test "Create a tech conference event" command
+- [ ] Test "Make a music festival with VIP tickets" command  
+- [ ] Test waitlist toggle functionality
+- [ ] Verify default ticket name is "General Admission"
+- [ ] Test event description updates
+- [ ] Verify only 4 methods are available to AI
+
+**NEXT STEPS**: Test the following commands in the browser:
+1. "Create a tech conference in San Francisco"
+2. "Make a music festival with VIP tickets and waitlist enabled"
+3. "Set up a corporate training event"
+4. "Create a workshop with student tickets"
 
 ## COMPLETED PHASES
 
@@ -68,40 +70,63 @@
 - [x] Advanced error handling and fallbacks
 - [x] Enterprise-ready architecture
 
-### ✅ Phase 3.5: AI Manipulation Registry
-- [x] Centralized registry for all AI-manipulable methods
-- [x] Security boundaries and validation
-- [x] Audit logging and error handling
-- [x] Enterprise-level security implementation
+### ✅ Phase 4: AI Manipulation Registry (Security Implementation)
+- [x] Created centralized AI manipulation registry (`src/services/aiManipulationRegistry.js`)
+- [x] Implemented security boundaries and validation
+- [x] Added comprehensive input validation and sanitization
+- [x] Built audit logging system for all AI actions
+- [x] Updated AI service to use registry exclusively
+- [x] Refactored Home.vue component to use registry
+- [x] Enforced security model - AI can only execute registry methods
+- [x] Added error handling and proper boundaries
+- [x] **STORY CREATION TOOL COMPLETE** - Fully functional with 10+ AI methods
+
+### 📋 Phase 5: Direction Change Documentation
+- [x] **PIVOT DECISION**: Change from story creation tool to event creation tool
+- [x] **REQUIREMENTS DEFINED**: 4 specific event methods only
+- [x] **TASK LIST UPDATED**: Clear implementation roadmap created
+- [x] **ARCHITECTURE PRESERVED**: Registry security model will be maintained
+
+### ❌ DOCUMENTATION (DO LAST - AFTER EVENT TOOL COMPLETE)
+- [ ] Update README.md with event creation focus
+- [ ] Create user guide for event creation commands
+- [ ] Document security model and boundaries
+- [ ] Update API documentation for event methods
+- [ ] Create developer guide for extending registry
 
 ## ARCHITECTURE NOTES
 
-### Security Model
+### Current State
+- **Story Creation Tool**: Fully functional with 10+ AI manipulation methods
+- **Security Registry**: Complete and working
+- **AI Integration**: Full OpenAI API integration with function calling
+
+### New Direction: Event Creation Tool
+- **Scope Reduction**: From 10+ methods to exactly 4 event methods
+- **UI Focus**: Event name, description, ticket info, waitlist toggle
+- **Same Architecture**: Registry security model preserved
+- **Same Technology**: Vue 3, OpenAI API, enterprise security
+
+### Security Model (Preserved)
 ```
 User Command → AI Service → Registry Validation → Secure Execution → UI Update
 ```
 
-- Registry is the single source of truth for AI capabilities
-- All AI commands must go through registry validation
-- Input sanitization and validation built-in
-- Action logging for audit trails
+### Key Files to Modify
+- `src/services/aiManipulationRegistry.js` - Replace methods with event methods
+- `src/services/aiService.js` - Update function schemas for event methods
+- `src/components/Home.vue` - Replace story UI with event creation UI
 
-### Key Files
-- `src/services/aiManipulationRegistry.js` - Core registry with all AI methods
-- `src/services/aiService.js` - AI service using registry exclusively
-- `src/components/Home.vue` - UI component using registry methods
+### New Event Creation Commands (Target)
+- "Create a tech conference in San Francisco"
+- "Make a music festival with VIP tickets and waitlist enabled"
+- "Set up a corporate training event"
 
-### Testing Commands (Once validation complete)
-```bash
-npm run dev      # Test in development mode
-# Test commands like:
-# "Create a magical story"
-# "Add purple buttons"
-# "Change to space theme"
-```
+## INSTRUCTIONS FOR NEXT IMPLEMENTATION SESSION
+1. **Implement the 4 event methods** in the registry first
+2. **Update the UI** to display event information instead of stories  
+3. **Update AI service** with new function schemas
+4. **Test the event creation** functionality
+5. **Document after everything works**
 
-## INSTRUCTIONS FOR NEXT SESSION
-1. **Start with testing** - run the dev server and test AI commands
-2. **Fix any runtime issues** found during testing
-3. **Only update documentation after** everything works properly
-4. **Focus on functionality first**, documentation last
+**STATUS**: Ready to begin Phase 5 implementation in next session.
