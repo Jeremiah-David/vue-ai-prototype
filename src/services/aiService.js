@@ -37,9 +37,21 @@ class AIService {
         try {
             const apiKey = import.meta.env.VITE_OPENAI_API_KEY
 
+            // Log for debugging
+            console.log('🔑 Checking API key availability...')
+            console.log('API key present:', !!apiKey)
+            console.log('API key starts with sk-:', apiKey?.startsWith('sk-'))
+
             // Demo/Mock mode when no API key is available
-            if (!apiKey || apiKey === 'your_openai_api_key_here') {
-                console.log('🔧 Running in DEMO MODE - No OpenAI API key provided')
+            if (
+                !apiKey ||
+                apiKey === 'your_openai_api_key_here' ||
+                apiKey === 'undefined' ||
+                apiKey === ''
+            ) {
+                console.log(
+                    '🔧 Running in DEMO MODE - No valid OpenAI API key provided'
+                )
                 console.log('💡 AI commands will use simulated responses')
                 this.client = null // Will trigger mock mode
                 this.isInitialized = true
@@ -351,7 +363,7 @@ Examples:
                 if (input.includes('festival')) eventName = 'Demo Festival'
                 if (input.includes('workshop')) eventName = 'Demo Workshop'
                 
-                const result = await registry.executeMethod('setEventName', { name: eventName })
+                const result = await registry.executeMethod('setEventName', eventName)
                 results.push({ function: 'setEventName', args: { name: eventName }, result })
             }
             
@@ -363,7 +375,7 @@ Examples:
                 if (input.includes('art')) description = 'An artistic showcase of creative talents'
                 if (input.includes('business')) description = 'A business networking and development event'
                 
-                const result = await registry.executeMethod('setEventDescription', { description })
+                const result = await registry.executeMethod('setEventDescription', description)
                 results.push({ function: 'setEventDescription', args: { description }, result })
             }
             
@@ -384,17 +396,14 @@ Examples:
             }
             
             for (const ticketType of ticketTypes) {
-                const result = await registry.executeMethod('addTicketType', { 
-                    name: ticketType, 
-                    price: Math.floor(Math.random() * 100) + 10 // Random price for demo
-                })
-                results.push({ function: 'addTicketType', args: { name: ticketType, price: result.args?.price }, result })
+                const result = await registry.executeMethod('addTicketType', ticketType)
+                results.push({ function: 'addTicketType', args: { name: ticketType }, result })
             }
             
             // Mock waitlist detection
             if (input.includes('waitlist')) {
                 const enabled = !input.includes('no') && !input.includes('disable') && !input.includes('off')
-                const result = await registry.executeMethod('toggleWaitlist', { enabled })
+                const result = await registry.executeMethod('toggleWaitlist', enabled)
                 results.push({ function: 'toggleWaitlist', args: { enabled }, result })
             }
             
